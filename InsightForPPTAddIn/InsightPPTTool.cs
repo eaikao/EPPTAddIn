@@ -16,13 +16,17 @@ namespace InsightForPPTAddIn
         }
 
         private void button1_Click(object sender, RibbonControlEventArgs e) {
-            //InsertForm insertForm = new InsertForm();
-            //insertForm.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            //insertForm.ShowDialog();
-
             //获取当前ppt中所有的幻灯片
+            int nIndex = 0;
             Slides slides = Globals.ThisAddIn.Application.ActivePresentation.Slides;
-            var activeSlide = (Slide)Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+            try {
+                var activeSlide = (Slide)Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+                nIndex = activeSlide.SlideIndex;
+            }
+            catch {
+                nIndex = slides.Count;
+            }
+
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.Multiselect = true;
             dlg.Filter = "视频文件|*.avi;*.rmvb;*.rm;*.asf;*.asx;*.wmx;*.mov;*.flv;*.swf;*.divx;*.mpg;*.mpeg;*.mpe;*.wmv;*.mp4;*.mkv;*.vob";
@@ -30,11 +34,16 @@ namespace InsightForPPTAddIn
             {
                 foreach (string file in dlg.FileNames)
                 {
-                    Slide curSlide = slides.Add(activeSlide.SlideIndex + 1, PpSlideLayout.ppLayoutBlank);
+                    Slide curSlide = slides.Add(nIndex + 1, PpSlideLayout.ppLayoutBlank);
                     Shape meidaShap = curSlide.Shapes.AddMediaObject2(file);
-                    meidaShap.Top = meidaShap.Height / 4;
-                    meidaShap.Left = meidaShap.Width / 4;
-                    meidaShap.Width = meidaShap.Width / 2;
+                    float fMasterWidth = curSlide.Master.Width;
+                    float fMasterHeight = curSlide.Master.Height;
+                    float fShapWidth = meidaShap.Width;
+                    float fShapHeight = meidaShap.Height;
+                    meidaShap.Width = fMasterWidth / 2;
+                    meidaShap.Top = (fMasterHeight - meidaShap.Height) / 2;
+                    meidaShap.Left = (fMasterWidth - meidaShap.Width) / 2;
+                 
                     if (meidaShap != null && meidaShap.MediaType == PpMediaType.ppMediaTypeMovie) {
                         meidaShap.AnimationSettings.PlaySettings.LoopUntilStopped = Microsoft.Office.Core.MsoTriState.msoTrue;
                         meidaShap.AnimationSettings.PlaySettings.PlayOnEntry = Microsoft.Office.Core.MsoTriState.msoTrue;
@@ -43,7 +52,7 @@ namespace InsightForPPTAddIn
                             effect.Timing.TriggerType = MsoAnimTriggerType.msoAnimTriggerWithPrevious;
                         }
                     }
-                    activeSlide = curSlide;
+                    nIndex = curSlide.SlideIndex;
                 }
 
             }

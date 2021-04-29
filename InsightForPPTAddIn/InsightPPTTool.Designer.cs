@@ -44,7 +44,7 @@
             // m_pInsightTab
             // 
             this.m_pInsightTab.Groups.Add(this.group1);
-            this.m_pInsightTab.Label = "北芯PPT插件助手";
+            this.m_pInsightTab.Label = "多视频导入插件";
             this.m_pInsightTab.Name = "m_pInsightTab";
             // 
             // group1
